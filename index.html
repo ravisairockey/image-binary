@@ -3,683 +3,504 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Image ↔ Binary Converter</title>
+    <title>Image to Binary Converter</title>
     <style>
         :root {
-            --primary: #4a6fa5;
-            --secondary: #166088;
-            --accent: #4fc3f7;
-            --light: #f8f9fa;
-            --dark: #212529;
-            --success: #28a745;
-            --warning: #ffc107;
-            --danger: #dc3545;
+            --primary-color: #0a0a0a;
+            --secondary-color: rgba(26, 26, 26, 0.5);
+            --accent-color: #00aaff;
+            --text-color: #f0f0f0;
+            --border-color: rgba(51, 51, 51, 0.5);
+            --success-color: #28a745;
+            --error-color: #dc3545;
         }
-        
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
+
         body {
-            background-color: #f5f7fa;
-            color: var(--dark);
-            line-height: 1.6;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        
-        h1 {
-            color: var(--secondary);
-            margin-bottom: 10px;
-        }
-        
-        .subtitle {
-            color: #666;
-            font-size: 1.1rem;
-        }
-        
-        .converter-app {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-        }
-        
-        @media (max-width: 768px) {
-            .converter-app {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        .converter-section {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            padding: 25px;
-            transition: transform 0.3s ease;
-        }
-        
-        .converter-section:hover {
-            transform: translateY(-5px);
-        }
-        
-        .section-title {
-            color: var(--primary);
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .section-title i {
-            font-size: 1.5rem;
-        }
-        
-        .drop-area {
-            border: 2px dashed #ccc;
-            border-radius: 8px;
-            padding: 30px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 20px;
-            position: relative;
-            min-height: 200px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a, #0a0a0a);
+            color: var(--text-color);
+            margin: 0;
+            padding: 2rem;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
+            min-height: 100vh;
         }
-        
-        .drop-area.highlight {
-            border-color: var(--accent);
-            background-color: rgba(79, 195, 247, 0.1);
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
         }
-        
-        .drop-area img {
-            max-width: 100%;
-            max-height: 200px;
-            margin-bottom: 15px;
-            border-radius: 4px;
+
+        h1 {
+            font-size: 2.5rem;
+            color: var(--accent-color);
+            margin-bottom: 0.5rem;
         }
-        
-        .file-input {
-            display: none;
+
+        main {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
         }
-        
-        .btn {
-            background-color: var(--primary);
-            color: white;
+
+        .converter-section {
+            background: var(--secondary-color);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+            z-index: 1;
+        }
+
+        .converter-section:hover {
+            box-shadow: 0 0 30px rgba(0, 170, 255, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .drop-zone {
+            border: 2px dashed var(--border-color);
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+        }
+
+        .drop-zone.dragover {
+            border-color: var(--accent-color);
+            background-color: rgba(0, 170, 255, 0.1);
+        }
+
+        h2 {
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 0.5rem;
+            margin-top: 0;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            cursor: pointer;
+            background-color: var(--accent-color);
+            color: var(--primary-color);
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .file-input-wrapper:hover {
+            background-color: #0088cc;
+            transform: scale(1.05);
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        #image-file-name, #binary-file-name {
+            margin-left: 1rem;
+            font-style: italic;
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            margin-top: 1rem;
+            padding: 10px;
+            font-family: 'Courier New', Courier, monospace;
+            resize: vertical;
+        }
+
+        button {
+            background-color: var(--accent-color);
+            color: var(--primary-color);
             border: none;
             padding: 10px 20px;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 1rem;
-            transition: background-color 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            font-weight: bold;
+            margin-top: 1rem;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        button:hover {
+            background-color: #0088cc;
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 170, 255, 0.2);
         }
         
-        .btn:hover {
-            background-color: var(--secondary);
+        button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
         }
-        
-        .btn-secondary {
-            background-color: #6c757d;
-        }
-        
-        .btn-secondary:hover {
-            background-color: #5a6268;
-        }
-        
-        .btn-danger {
-            background-color: var(--danger);
-        }
-        
-        .btn-danger:hover {
-            background-color: #c82333;
-        }
-        
-        .progress-container {
-            width: 100%;
-            background-color: #e9ecef;
+
+        #image-preview-container, #reconstructed-image-container {
+            margin-top: 1rem;
+            min-height: 100px;
+            border: 2px dashed var(--border-color);
             border-radius: 5px;
-            margin: 15px 0;
-            display: none;
-        }
-        
-        .progress-bar {
-            height: 20px;
-            background-color: var(--success);
-            border-radius: 5px;
-            width: 0%;
-            transition: width 0.3s ease;
-            text-align: center;
-            color: white;
-            font-size: 0.8rem;
-            line-height: 20px;
-        }
-        
-        .binary-preview {
-            width: 100%;
-            height: 150px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.8rem;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background-color: #f8f9fa;
-            overflow-y: auto;
-            margin-bottom: 15px;
-            white-space: pre-wrap;
-            word-break: break-all;
-        }
-        
-        .file-info {
-            margin-top: 15px;
-            font-size: 0.9rem;
-            color: #666;
-        }
-        
-        .action-buttons {
             display: flex;
-            gap: 10px;
-            margin-top: 15px;
-            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
         }
-        
-        .hidden {
-            display: none;
+
+        #image-preview, #reconstructed-image {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 5px;
         }
-        
-        .status-message {
+
+        select {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
             padding: 10px;
             border-radius: 5px;
-            margin: 10px 0;
+            margin-top: 1rem;
+        }
+
+        footer {
+            margin-top: 3rem;
             text-align: center;
+            font-size: 1rem;
+            color: #777;
+            padding: 1rem;
         }
-        
-        .success {
-            background-color: rgba(40, 167, 69, 0.2);
-            color: var(--success);
+
+        .ascii-art {
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre;
+            color: var(--accent-color);
+            font-size: 1.2rem;
+            line-height: 1;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 5px rgba(0, 170, 255, 0.5);
         }
-        
-        .error {
-            background-color: rgba(220, 53, 69, 0.2);
-            color: var(--danger);
+
+        footer a {
+            color: var(--accent-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
         }
-        
-        .loading-spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
+
+        footer a:hover {
+            color: var(--text-color);
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--accent-color);
+            color: var(--primary-color);
+            padding: 15px 25px;
+            border-radius: 5px;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-100px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.success { background-color: var(--success-color); }
+        .toast.error { background-color: var(--error-color); }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--accent-color);
             border-radius: 50%;
-            border-top: 4px solid var(--primary);
-            width: 30px;
-            height: 30px;
+            width: 40px;
+            height: 40px;
             animation: spin 1s linear infinite;
+            display: none; /* Hidden by default */
             margin: 20px auto;
         }
-        
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
-        footer {
-            text-align: center;
-            margin-top: 50px;
-            color: #666;
-            font-size: 0.9rem;
+
+        @media (max-width: 768px) {
+            main {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Advanced Image ↔ Binary Converter</h1>
-            <p class="subtitle">Convert between images and binary representations with ease</p>
-        </header>
-        
-        <div class="converter-app">
-            <!-- Image to Binary Section -->
-            <div class="converter-section">
-                <h2 class="section-title">
-                    <i class="fas fa-image"></i> Image to Binary
-                </h2>
-                
-                <div id="imageDropArea" class="drop-area">
-                    <div id="imageUploadContent">
-                        <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: var(--primary); margin-bottom: 15px;"></i>
-                        <p>Drag & drop an image file here or click to browse</p>
-                        <input type="file" id="imageInput" class="file-input" accept="image/*">
-                        <button class="btn" onclick="document.getElementById('imageInput').click()">
-                            <i class="fas fa-folder-open"></i> Select Image
-                        </button>
-                    </div>
-                    <div id="imagePreviewContainer" class="hidden">
-                        <img id="imagePreview" src="#" alt="Preview">
-                        <div class="file-info" id="imageFileInfo"></div>
-                    </div>
-                </div>
-                
-                <div class="progress-container" id="imageProgressContainer">
-                    <div class="progress-bar" id="imageProgressBar">0%</div>
-                </div>
-                
-                <div id="binaryOutputSection" class="hidden">
-                    <h3>Binary Preview (first 1000 bytes):</h3>
-                    <div class="binary-preview" id="binaryPreview"></div>
-                    
-                    <div class="action-buttons">
-                        <button class="btn" id="downloadBinaryBtn">
-                            <i class="fas fa-download"></i> Download Binary
-                        </button>
-                        <button class="btn btn-secondary" id="copyBinaryBtn">
-                            <i class="fas fa-copy"></i> Copy to Clipboard
-                        </button>
-                        <button class="btn btn-danger" id="resetImageBtn">
-                            <i class="fas fa-trash"></i> Reset
-                        </button>
-                    </div>
-                </div>
-                
-                <div id="imageStatusMessage" class="status-message hidden"></div>
+
+    <header>
+        <h1>Image &harr; Binary Converter</h1>
+        <p>A modern, functional, and visually appealing tool for all your conversion needs.</p>
+    </header>
+
+    <main>
+        <section class="converter-section drop-zone" id="image-drop-zone">
+            <h2>Image to Binary</h2>
+            <div class="file-input-wrapper">
+                <span>Select Image</span>
+                <input type="file" id="image-input" accept=".jpg,.jpeg,.png,.webp,.gif,.bmp,.ico,.svg">
             </div>
-            
-            <!-- Binary to Image Section -->
-            <div class="converter-section">
-                <h2 class="section-title">
-                    <i class="fas fa-code"></i> Binary to Image
-                </h2>
-                
-                <div id="binaryDropArea" class="drop-area">
-                    <div id="binaryUploadContent">
-                        <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: var(--primary); margin-bottom: 15px;"></i>
-                        <p>Drag & drop a binary file here or click to browse</p>
-                        <input type="file" id="binaryInput" class="file-input">
-                        <button class="btn" onclick="document.getElementById('binaryInput').click()">
-                            <i class="fas fa-folder-open"></i> Select Binary File
-                        </button>
-                    </div>
-                    <div id="binaryPreviewContainer" class="hidden">
-                        <div class="file-info" id="binaryFileInfo"></div>
-                    </div>
-                </div>
-                
-                <div class="progress-container" id="binaryProgressContainer">
-                    <div class="progress-bar" id="binaryProgressBar">0%</div>
-                </div>
-                
-                <div id="imageOutputSection" class="hidden">
-                    <h3>Reconstructed Image:</h3>
-                    <img id="reconstructedImage" src="#" alt="Reconstructed Image" style="max-width: 100%; max-height: 200px; display: block; margin: 0 auto 15px; border-radius: 4px;">
-                    
-                    <div class="action-buttons">
-                        <button class="btn" id="downloadImageBtn">
-                            <i class="fas fa-download"></i> Download Image
-                        </button>
-                        <button class="btn btn-danger" id="resetBinaryBtn">
-                            <i class="fas fa-trash"></i> Reset
-                        </button>
-                    </div>
-                </div>
-                
-                <div id="binaryStatusMessage" class="status-message hidden"></div>
+            <span id="image-file-name">No file selected</span>
+            <div id="image-preview-container">
+                <span>Image Preview</span>
             </div>
+            <div id="image-loader" class="loader"></div>
+            <textarea id="binary-output" readonly placeholder="Binary output will appear here..."></textarea>
+            <button id="download-binary-btn" disabled>Download Binary (.txt)</button>
+        </section>
+
+        <section class="converter-section">
+            <h2>Binary to Image</h2>
+            <textarea id="binary-input" placeholder="Paste binary string here..."></textarea>
+            <div>
+                <select id="image-type-select">
+                    <option value="image/png">PNG</option>
+                    <option value="image/jpeg">JPEG</option>
+                    <option value="image/webp">WEBP</option>
+                    <option value="image/gif">GIF</option>
+                    <option value="image/bmp">BMP</option>
+                    <option value="image/vnd.microsoft.icon">ICO</option>
+                    <option value="image/svg+xml">SVG</option>
+                </select>
+                <button id="convert-to-image-btn">Convert to Image</button>
+            </div>
+            <div id="reconstructed-image-container">
+                <span>Reconstructed Image</span>
+            </div>
+            <div id="binary-loader" class="loader"></div>
+            <button id="download-image-btn" disabled>Download Image</button>
+        </section>
+    </main>
+
+    <footer>
+        <div class="ascii-art">
+RRRRRRRRRRRRRRRRR      SSSSSSSSSSSSSSS VVVVVVVV           VVVVVVVV
+R::::::::::::::::R   SS:::::::::::::::SV::::::V           V::::::V
+R::::::RRRRRR:::::R S:::::SSSSSS::::::SV::::::V           V::::::V
+RR:::::R     R:::::RS:::::S     SSSSSSSV::::::V           V::::::V
+  R::::R     R:::::RS:::::S             V:::::V           V:::::V 
+  R::::R     R:::::RS:::::S              V:::::V         V:::::V  
+  R::::RRRRRR:::::R  S::::SSSS            V:::::V       V:::::V   
+  R:::::::::::::RR    SS::::::SSSSS        V:::::V     V:::::V    
+  R::::RRRRRR:::::R     SSS::::::::SS       V:::::V   V:::::V     
+  R::::R     R:::::R       SSSSSS::::S       V:::::V V:::::V      
+  R::::R     R:::::R            S:::::S       V:::::V:::::V       
+  R::::R     R:::::R            S:::::S        V:::::::::V        
+RR:::::R     R:::::RSSSSSSS     S:::::S         V:::::::V         
+R::::::R     R:::::RS::::::SSSSSS:::::S          V:::::V          
+R::::::R     R:::::RS:::::::::::::::SS            V:::V           
+RRRRRRRR     RRRRRRR SSSSSSSSSSSSSSS               VVV            
         </div>
-        
-        <footer>
-            <p>Advanced Image ↔ Binary Converter | &copy; 2023 | Works with JPG, PNG, GIF, WEBP, etc.</p>
-        </footer>
-    </div>
+        <p>crafted by @RSVamil | <a href="https://github.com/ravisairockey" target="_blank" rel="noopener noreferrer">GitHub</a></p>
+        <p>Created with HTML, CSS, and JavaScript. Supports Chrome, Firefox, and Safari.</p>
+    </footer>
 
     <script>
-        // Image to Binary Section
-        const imageDropArea = document.getElementById('imageDropArea');
-        const imageInput = document.getElementById('imageInput');
-        const imagePreview = document.getElementById('imagePreview');
-        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
-        const imageUploadContent = document.getElementById('imageUploadContent');
-        const binaryPreview = document.getElementById('binaryPreview');
-        const binaryOutputSection = document.getElementById('binaryOutputSection');
-        const downloadBinaryBtn = document.getElementById('downloadBinaryBtn');
-        const copyBinaryBtn = document.getElementById('copyBinaryBtn');
-        const resetImageBtn = document.getElementById('resetImageBtn');
-        const imageFileInfo = document.getElementById('imageFileInfo');
-        const imageProgressContainer = document.getElementById('imageProgressContainer');
-        const imageProgressBar = document.getElementById('imageProgressBar');
-        const imageStatusMessage = document.getElementById('imageStatusMessage');
-        
-        let currentBinaryData = null;
-        
-        // Binary to Image Section
-        const binaryDropArea = document.getElementById('binaryDropArea');
-        const binaryInput = document.getElementById('binaryInput');
-        const binaryUploadContent = document.getElementById('binaryUploadContent');
-        const binaryPreviewContainer = document.getElementById('binaryPreviewContainer');
-        const binaryFileInfo = document.getElementById('binaryFileInfo');
-        const reconstructedImage = document.getElementById('reconstructedImage');
-        const imageOutputSection = document.getElementById('imageOutputSection');
-        const downloadImageBtn = document.getElementById('downloadImageBtn');
-        const resetBinaryBtn = document.getElementById('resetBinaryBtn');
-        const binaryProgressContainer = document.getElementById('binaryProgressContainer');
-        const binaryProgressBar = document.getElementById('binaryProgressBar');
-        const binaryStatusMessage = document.getElementById('binaryStatusMessage');
-        
-        // Prevent default drag behaviors
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            imageDropArea.addEventListener(eventName, preventDefaults, false);
-            binaryDropArea.addEventListener(eventName, preventDefaults, false);
-        });
-        
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-        
-        // Highlight drop area when item is dragged over it
-        ['dragenter', 'dragover'].forEach(eventName => {
-            imageDropArea.addEventListener(eventName, highlightImageDropArea, false);
-            binaryDropArea.addEventListener(eventName, highlightBinaryDropArea, false);
-        });
-        
-        ['dragleave', 'drop'].forEach(eventName => {
-            imageDropArea.addEventListener(eventName, unhighlightImageDropArea, false);
-            binaryDropArea.addEventListener(eventName, unhighlightBinaryDropArea, false);
-        });
-        
-        function highlightImageDropArea() {
-            imageDropArea.classList.add('highlight');
-        }
-        
-        function unhighlightImageDropArea() {
-            imageDropArea.classList.remove('highlight');
-        }
-        
-        function highlightBinaryDropArea() {
-            binaryDropArea.classList.add('highlight');
-        }
-        
-        function unhighlightBinaryDropArea() {
-            binaryDropArea.classList.remove('highlight');
-        }
-        
-        // Handle dropped files
-        imageDropArea.addEventListener('drop', handleImageDrop, false);
-        binaryDropArea.addEventListener('drop', handleBinaryDrop, false);
-        
-        function handleImageDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            if (files.length > 0) {
-                handleImageFile(files[0]);
-            }
-        }
-        
-        function handleBinaryDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            if (files.length > 0) {
-                handleBinaryFile(files[0]);
-            }
-        }
-        
-        // Handle selected files
-        imageInput.addEventListener('change', function() {
-            if (this.files.length > 0) {
-                handleImageFile(this.files[0]);
-            }
-        });
-        
-        binaryInput.addEventListener('change', function() {
-            if (this.files.length > 0) {
-                handleBinaryFile(this.files[0]);
-            }
-        });
-        
-        // Process image file
-        function handleImageFile(file) {
-            // Check if file is an image
-            if (!file.type.match('image.*')) {
-                showStatusMessage(imageStatusMessage, 'Please select an image file (JPG, PNG, GIF, etc.)', 'error');
-                return;
-            }
-            
-            // Update UI
-            imageUploadContent.classList.add('hidden');
-            imagePreviewContainer.classList.remove('hidden');
-            imageFileInfo.textContent = `File: ${file.name} (${formatFileSize(file.size)})`;
-            
-            // Show progress bar
-            imageProgressContainer.style.display = 'block';
-            imageProgressBar.style.width = '0%';
-            imageProgressBar.textContent = '0%';
-            
-            // Read file as data URL for preview
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                imagePreview.src = e.target.result;
-                
-                // Simulate progress for demo purposes
-                simulateProgress(imageProgressBar, () => {
-                    // After "processing" is complete
-                    processImageToBinary(file);
-                });
+        document.addEventListener('DOMContentLoaded', () => {
+            const showToast = (message, type = 'info') => {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.classList.add('show');
+                }, 100);
+
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => {
+                        document.body.removeChild(toast);
+                    }, 500);
+                }, 3000);
             };
-            
-            reader.readAsDataURL(file);
-        }
-        
-        // Process binary file
-        function handleBinaryFile(file) {
-            // Update UI
-            binaryUploadContent.classList.add('hidden');
-            binaryPreviewContainer.classList.remove('hidden');
-            binaryFileInfo.textContent = `File: ${file.name} (${formatFileSize(file.size)})`;
-            
-            // Show progress bar
-            binaryProgressContainer.style.display = 'block';
-            binaryProgressBar.style.width = '0%';
-            binaryProgressBar.textContent = '0%';
-            
-            // Read file as array buffer
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                // Simulate progress for demo purposes
-                simulateProgress(binaryProgressBar, () => {
-                    // After "processing" is complete
-                    processBinaryToImage(e.target.result, file.name);
-                });
-            };
-            
-            reader.readAsArrayBuffer(file);
-        }
-        
-        // Convert image to binary
-        function processImageToBinary(file) {
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                const arrayBuffer = e.target.result;
-                currentBinaryData = arrayBuffer;
-                
-                // Convert to binary string for preview (first 1000 bytes)
-                const uint8Array = new Uint8Array(arrayBuffer);
-                let binaryString = '';
-                const previewLength = Math.min(1000, uint8Array.length);
-                
-                for (let i = 0; i < previewLength; i++) {
-                    // Convert byte to binary representation (8 bits)
-                    const byte = uint8Array[i];
-                    binaryString += byte.toString(2).padStart(8, '0') + ' ';
-                    
-                    // Add line break every 10 bytes for better readability
-                    if ((i + 1) % 10 === 0) {
-                        binaryString += '\n';
+
+            // Image to Binary
+            const imageInput = document.getElementById('image-input');
+            const imageFileName = document.getElementById('image-file-name');
+            const imagePreviewContainer = document.getElementById('image-preview-container');
+            const imageLoader = document.getElementById('image-loader');
+            const binaryOutput = document.getElementById('binary-output');
+            const downloadBinaryBtn = document.getElementById('download-binary-btn');
+            let binaryData = '';
+            let inputFileName = 'binary_data';
+
+            const handleFile = (file) => {
+                if (!file) return;
+
+                // Auto-detect and set image type
+                const fileType = file.type;
+                const typeSelect = document.getElementById('image-type-select');
+                let typeSupported = false;
+                for (let i = 0; i < typeSelect.options.length; i++) {
+                    if (typeSelect.options[i].value === fileType) {
+                        typeSelect.value = fileType;
+                        typeSupported = true;
+                        break;
                     }
                 }
-                
-                if (uint8Array.length > previewLength) {
-                    binaryString += `\n... (${uint8Array.length - previewLength} more bytes)`;
+
+                if (!typeSupported) {
+                    showToast(`File type "${fileType}" is not supported.`, 'error');
+                    return;
                 }
-                
-                binaryPreview.textContent = binaryString;
-                binaryOutputSection.classList.remove('hidden');
-                
-                showStatusMessage(imageStatusMessage, 'Image successfully converted to binary!', 'success');
-            };
-            
-            reader.onerror = function() {
-                showStatusMessage(imageStatusMessage, 'Error reading the image file', 'error');
-                resetImageSection();
-            };
-            
-            reader.readAsArrayBuffer(file);
-        }
-        
-        // Convert binary to image
-        function processBinaryToImage(arrayBuffer, originalFileName) {
-            try {
-                // Create a blob from the array buffer
-                const blob = new Blob([arrayBuffer]);
-                const url = URL.createObjectURL(blob);
-                
-                // Check if the binary data is a valid image
-                const img = new Image();
-                img.onload = function() {
-                    reconstructedImage.src = url;
-                    imageOutputSection.classList.remove('hidden');
+
+                imageFileName.textContent = file.name;
+                inputFileName = file.name.split('.')[0];
+                binaryOutput.value = '';
+                downloadBinaryBtn.disabled = true;
+                imageLoader.style.display = 'block';
+                imagePreviewContainer.innerHTML = '<span>Image Preview</span>';
+
+                const reader = new FileReader();
+
+                reader.onload = (e) => {
+                    const arrayBuffer = e.target.result;
                     
-                    // Set up download with appropriate file extension
-                    let fileExtension = 'bin';
-                    const fileNameParts = originalFileName.split('.');
-                    if (fileNameParts.length > 1) {
-                        const possibleExtension = fileNameParts.pop().toLowerCase();
-                        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(possibleExtension)) {
-                            fileExtension = possibleExtension;
-                        }
-                    }
-                    
-                    downloadImageBtn.onclick = function() {
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = `reconstructed_image.${fileExtension}`;
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                    };
-                    
-                    showStatusMessage(binaryStatusMessage, 'Image successfully reconstructed from binary!', 'success');
+                    const blob = new Blob([arrayBuffer], { type: fileType });
+                    const imgUrl = URL.createObjectURL(blob);
+                    const img = document.createElement('img');
+                    img.id = 'image-preview';
+                    img.src = imgUrl;
+                    imagePreviewContainer.innerHTML = '';
+                    imagePreviewContainer.appendChild(img);
+
+                    setTimeout(() => {
+                        const uint8 = new Uint8Array(arrayBuffer);
+                        let binaryString = '';
+                        uint8.forEach(byte => {
+                            binaryString += byte.toString(2).padStart(8, '0');
+                        });
+                        binaryData = binaryString;
+                        binaryOutput.value = binaryString;
+                        downloadBinaryBtn.disabled = false;
+                        imageLoader.style.display = 'none';
+                        showToast('Image converted to binary!', 'success');
+                    }, 50);
                 };
                 
-                img.onerror = function() {
-                    showStatusMessage(binaryStatusMessage, 'The binary file does not appear to be a valid image', 'error');
-                    resetBinarySection();
-                };
-                
-                img.src = url;
-            } catch (error) {
-                showStatusMessage(binaryStatusMessage, 'Error processing the binary file', 'error');
-                resetBinarySection();
-            }
-        }
-        
-        // Download binary file
-        downloadBinaryBtn.addEventListener('click', function() {
-            if (currentBinaryData) {
-                const blob = new Blob([currentBinaryData]);
+                reader.readAsArrayBuffer(file);
+            };
+
+            imageInput.addEventListener('change', (event) => {
+                handleFile(event.target.files[0]);
+            });
+
+            // Drag and drop
+            const dropZone = document.getElementById('image-drop-zone');
+
+            dropZone.addEventListener('dragover', (event) => {
+                event.preventDefault();
+                dropZone.classList.add('dragover');
+            });
+
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('dragover');
+            });
+
+            dropZone.addEventListener('drop', (event) => {
+                event.preventDefault();
+                dropZone.classList.remove('dragover');
+                const file = event.dataTransfer.files[0];
+                handleFile(file);
+            });
+
+            downloadBinaryBtn.addEventListener('click', () => {
+                const blob = new Blob([binaryData], { type: 'text/plain' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'image_binary.bin';
+                a.download = `${inputFileName}.txt`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-                
-                showStatusMessage(imageStatusMessage, 'Binary file downloaded successfully!', 'success');
-            }
-        });
-        
-        // Copy binary to clipboard
-        copyBinaryBtn.addEventListener('click', function() {
-            if (binaryPreview.textContent) {
-                navigator.clipboard.writeText(binaryPreview.textContent)
-                    .then(() => {
-                        showStatusMessage(imageStatusMessage, 'Binary preview copied to clipboard!', 'success');
-                    })
-                    .catch(err => {
-                        showStatusMessage(imageStatusMessage, 'Failed to copy to clipboard', 'error');
-                    });
-            }
-        });
-        
-        // Reset sections
-        resetImageBtn.addEventListener('click', resetImageSection);
-        resetBinaryBtn.addEventListener('click', resetBinarySection);
-        
-        function resetImageSection() {
-            imageUploadContent.classList.remove('hidden');
-            imagePreviewContainer.classList.add('hidden');
-            binaryOutputSection.classList.add('hidden');
-            imageProgressContainer.style.display = 'none';
-            imageInput.value = '';
-            currentBinaryData = null;
-            imageStatusMessage.classList.add('hidden');
-        }
-        
-        function resetBinarySection() {
-            binaryUploadContent.classList.remove('hidden');
-            binaryPreviewContainer.classList.add('hidden');
-            imageOutputSection.classList.add('hidden');
-            binaryProgressContainer.style.display = 'none');
-            binaryInput.value = '';
-            binaryStatusMessage.classList.add('hidden');
-        }
-        
-        // Helper functions
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
-        }
-        
-        function showStatusMessage(element, message, type) {
-            element.textContent = message;
-            element.className = 'status-message ' + type;
-            element.classList.remove('hidden');
-        }
-        
-        function simulateProgress(progressBar, callback) {
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += Math.random() * 10;
-                if (progress >= 100) {
-                    progress = 100;
-                    clearInterval(interval);
-                    setTimeout(callback, 300);
+                showToast('Binary file downloaded!', 'success');
+            });
+
+            // Binary to Image
+            const binaryInput = document.getElementById('binary-input');
+            const imageTypeSelect = document.getElementById('image-type-select');
+            const convertToImageBtn = document.getElementById('convert-to-image-btn');
+            const reconstructedImageContainer = document.getElementById('reconstructed-image-container');
+            const binaryLoader = document.getElementById('binary-loader');
+            const downloadImageBtn = document.getElementById('download-image-btn');
+            let reconstructedImageUrl = null;
+
+            convertToImageBtn.addEventListener('click', () => {
+                const binaryString = binaryInput.value.replace(/\s/g, '');
+                if (binaryString.length === 0 || binaryString.length % 8 !== 0) {
+                    showToast('Invalid binary string. Length must be a multiple of 8.', 'error');
+                    return;
                 }
-                progressBar.style.width = progress + '%';
-                progressBar.textContent = Math.floor(progress) + '%';
-            }, 100);
-        }
+
+                downloadImageBtn.disabled = true;
+                binaryLoader.style.display = 'block';
+                reconstructedImageContainer.innerHTML = '<span>Reconstructed Image</span>';
+
+                setTimeout(() => {
+                    try {
+                        const bytes = new Uint8Array(binaryString.length / 8);
+                        for (let i = 0; i < binaryString.length; i += 8) {
+                            bytes[i / 8] = parseInt(binaryString.substr(i, 8), 2);
+                        }
+
+                        const blob = new Blob([bytes], { type: imageTypeSelect.value });
+                        
+                        if (reconstructedImageUrl) {
+                            URL.revokeObjectURL(reconstructedImageUrl);
+                        }
+                        reconstructedImageUrl = URL.createObjectURL(blob);
+
+                        const img = document.createElement('img');
+                        img.id = 'reconstructed-image';
+                        img.src = reconstructedImageUrl;
+                        reconstructedImageContainer.innerHTML = '';
+                        reconstructedImageContainer.appendChild(img);
+                        downloadImageBtn.disabled = false;
+                        showToast('Binary converted to image!', 'success');
+                    } catch (error) {
+                        showToast('Conversion failed. Check binary data and image type.', 'error');
+                        console.error(error);
+                    } finally {
+                        binaryLoader.style.display = 'none';
+                    }
+                }, 50);
+            });
+
+            downloadImageBtn.addEventListener('click', () => {
+                if (!reconstructedImageUrl) return;
+                const a = document.createElement('a');
+                a.href = reconstructedImageUrl;
+                const extension = imageTypeSelect.value.split('/')[1];
+                a.download = `reconstructed_image.${extension}`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                showToast('Image downloaded!', 'success');
+            });
+        });
     </script>
+
 </body>
 </html>
